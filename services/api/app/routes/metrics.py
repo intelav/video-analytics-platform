@@ -7,7 +7,7 @@ def get_conn():
     return psycopg2.connect(
         dbname="video_analytics",
         user="postgres",
-        password="noida1**",
+        password="",
         host="timescaledb",
         port="5432"
     )
