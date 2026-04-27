@@ -1,0 +1,50 @@
+# -------------------------
+# Node / React
+# -------------------------
+node_modules/
+frontend/react-dashboard/node_modules/
+frontend/react-dashboard/build/
+
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.pyc
+
+# -------------------------
+# AI Models / Triton
+# -------------------------
+*.pt
+*.onnx
+*.engine
+*.plan
+*.raw
+models/
+
+# -------------------------
+# Build artifacts
+# -------------------------
+build/
+dist/
+
+# -------------------------
+# Logs
+# -------------------------
+*.log
+
+# -------------------------
+# IDE
+# -------------------------
+.vscode/
+.idea/
+
+# -------------------------
+# OS files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Industrial protocol lab exclusions
+# -------------------------
+industrial-protocol-lab/opendnp3/
