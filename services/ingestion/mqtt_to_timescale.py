@@ -4,11 +4,13 @@ import psycopg2
 import time
 import os
 import sys
-
+import threading
+import paho.mqtt.client as mqtt
 # -------------------------
 # Config (from env)
 # -------------------------
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "rabbitmq")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
 
 DB_CONFIG = {
     "dbname": os.getenv("DB_NAME", "video_analytics"),
@@ -18,7 +20,8 @@ DB_CONFIG = {
     "port": os.getenv("DB_PORT", "5432")
 }
 
-QUEUE_NAME = "video_events"
+VIDEO_QUEUE = "video_events"
+MQTT_TOPIC = "industrial/#"
 
 
 # -------------------------
@@ -54,13 +57,12 @@ def connect_rabbitmq():
 
 
 # -------------------------
-# Callback (consume message)
+# VIDEO EVENT HANDLER (AMQP)
 # -------------------------
-def callback(ch, method, properties, body):
+def video_callback(ch, method, properties, body):
     try:
         data = json.loads(body)
-
-        print(f"📥 Received event: {data}")
+        print(f"🎥 Video Event: {data}")
 
         cur = db_conn.cursor()
 
@@ -76,45 +78,81 @@ def callback(ch, method, properties, body):
         ))
 
         db_conn.commit()
-
-        print("✅ Inserted into DB")
-
-        # Acknowledge ONLY after success
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     except Exception as e:
-        print(f"❌ Error processing message: {e}")
-
-        # Reject message (optional: requeue=True)
+        print(f"❌ Video error: {e}")
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
 
+# -------------------------
+# TELEMETRY HANDLER (MQTT)
+# -------------------------
+def mqtt_on_message(client, userdata, msg):
+    try:
+        data = json.loads(msg.payload.decode())
+        print(f"📡 Telemetry: {data}")
+
+        cur = db_conn.cursor()
+
+        cur.execute("""
+            INSERT INTO telemetry (time, device, protocol, metrics)
+            VALUES (NOW(), %s, %s, %s)
+        """, (
+            data.get("device_id"),
+            data.get("protocol"),
+            json.dumps(data.get("metrics", {}))
+        ))
+
+        db_conn.commit()
+
+    except Exception as e:
+        print(f"❌ Telemetry error: {e}")
 
 # -------------------------
-# Main
+# MQTT THREAD
+# -------------------------
+def start_mqtt():
+    while True:
+        try:
+            print("🔌 Connecting to MQTT...")
+            client = mqtt.Client()
+            client.connect(RABBITMQ_HOST, MQTT_PORT, 60)
+
+            client.on_message = mqtt_on_message
+            client.subscribe(MQTT_TOPIC, qos=1)
+
+            print(f"📡 Subscribed to {MQTT_TOPIC}")
+            client.loop_forever()
+
+        except Exception as e:
+            print(f"❌ MQTT reconnecting: {e}")
+            time.sleep(5)
+
+# -------------------------
+# MAIN
 # -------------------------
 if __name__ == "__main__":
 
     print("🚀 Starting ingestion service...")
 
-    # Connect DB
     db_conn = connect_db()
 
-    # Connect RabbitMQ
+    # Start MQTT in background
+    mqtt_thread = threading.Thread(target=start_mqtt, daemon=True)
+    mqtt_thread.start()
+
+    # AMQP setup
     rabbit_conn = connect_rabbitmq()
     channel = rabbit_conn.channel()
 
-    # Declare queue (safe if already exists)
-    channel.queue_declare(queue=QUEUE_NAME, durable=True)
-
-    # Fair dispatch (avoid overload)
+    channel.queue_declare(queue=VIDEO_QUEUE, durable=True)
     channel.basic_qos(prefetch_count=1)
 
-    # Start consuming
     channel.basic_consume(
-        queue=QUEUE_NAME,
-        on_message_callback=callback,
-        auto_ack=False   # IMPORTANT
+        queue=VIDEO_QUEUE,
+        on_message_callback=video_callback,
+        auto_ack=False
     )
 
-    print("🚀 Waiting for messages...")
+    print("🚀 Waiting for AMQP + MQTT messages...")
     channel.start_consuming()

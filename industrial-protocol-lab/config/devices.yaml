@@ -1,0 +1,15 @@
+devices:
+  - device_id: modbus_1
+    type: modbus
+    host: localhost
+    port: 5020
+
+  - device_id: opcua_1
+    type: opcua
+    url: opc.tcp://localhost:4840
+
+  - device_id: bacnet_1
+    type: bacnet
+
+  - device_id: goose_1
+    type: goose

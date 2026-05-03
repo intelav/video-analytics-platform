@@ -18,11 +18,14 @@ threading.Thread(
     daemon=True
 ).start()
 
-def generate(cam_name):
+def generate(cam_name, mode="yolo"):
     worker = workers[cam_name]
 
     while True:
-        frame = worker.get_frame()
+        if mode == "pose":
+            frame = worker.get_pose_frame()
+        else:
+            frame = worker.get_yolo_frame()
 
         if frame is None:
             time.sleep(0.01)
@@ -51,7 +54,18 @@ def stream(cam_name):
 
 @app.route('/cameras')
 def list_cameras():
-    return list(workers.keys())
+    return {
+    "cam1": {"yolo": True, "pose": True},
+    "cam2": {"yolo": True, "pose": False}
+    }
+
+@app.route('/video_pose/<cam_name>')
+def stream_pose(cam_name):
+    if cam_name not in workers:
+        return "Camera not found", 404
+
+    return Response(generate(cam_name, mode="pose"),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def shutdown(sig, frame):
     print("Shutting down...")

@@ -4,6 +4,7 @@ from yolo_utils import postprocess
 import pika
 import json
 from queue import Queue
+from pose_engine import PoseEngine
 
 event_queue = Queue()
 
@@ -59,7 +60,10 @@ class CameraWorker:
         self.running = True    
         self.frame = None
         self.lock = threading.Lock()
+        self.pose_engine = PoseEngine()
 
+        self.yolo_frame = None
+        self.pose_frame = None
         t = threading.Thread(target=self.run, daemon=True)
         t.start()
 
@@ -76,7 +80,7 @@ class CameraWorker:
                 continue
 
             annotated, detections = postprocess(preds, frame, depth)
-
+            pose_annotated = self.pose_engine.infer(frame)    
             # publish events (reuse your RabbitMQ)
             for det in detections:
                 det["camera_id"] = self.cam_id
@@ -84,6 +88,8 @@ class CameraWorker:
 
             with self.lock:
                 self.frame = annotated
+                self.yolo_frame = annotated
+                self.pose_frame = pose_annotated
 
             time.sleep(0.03)  # throttle
 
@@ -93,3 +99,11 @@ class CameraWorker:
 
     def stop(self):
         self.running = False        
+
+    def get_yolo_frame(self):
+        with self.lock:
+            return self.yolo_frame
+
+    def get_pose_frame(self):
+        with self.lock:
+            return self.pose_frame    

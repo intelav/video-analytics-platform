@@ -38,14 +38,14 @@ services:
   # -------------------------
   # React Frontend
   # -------------------------
-  frontend:
-    build: ../../frontend/react-dashboard
-    container_name: react-ui
-    ports:
-      - "3000:3000"
-    depends_on:
-      - api
-    restart: unless-stopped
+  # frontend:
+  #   build: ../../frontend/react-dashboard
+  #   container_name: react-ui
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api
+  #   restart: unless-stopped
 
   # -------------------------
   # RabbitMQ Broker
@@ -55,10 +55,15 @@ services:
     container_name: rabbitmq
     ports:
       - "5672:5672"     # AMQP
+      - "1883:1883"
       - "15672:15672"   # UI
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbitmq_stream advertised_host localhost"
+
+    volumes:
+       - ./enabled_plugins:/etc/rabbitmq/enabled_plugins 
     restart: unless-stopped
 
   # -------------------------

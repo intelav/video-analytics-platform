@@ -31,12 +31,12 @@ def get_camera_config():
     # USB Cameras (manual mapping)
     # -----------------------------
     # Based on your system:
-    # /dev/video6 → Logitech webcam (valid)
+    # /dev/video3 → Logitech webcam (valid)
     # /dev/video7 → ignore (duplicate/metadata)
 
     config["cam2"] = {
         "type": "usb",
-        "device": 6,
+        "device": 3,
         "name": "USB Webcam"
     }
 

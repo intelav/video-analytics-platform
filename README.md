@@ -46,6 +46,15 @@ CREATE TABLE telemetry (
 
 SELECT create_hypertable('telemetry', 'time');
 
+CREATE TABLE telemetry (
+    time TIMESTAMPTZ NOT NULL,
+    device TEXT NOT NULL,
+    protocol TEXT NOT NULL,
+    metrics JSONB NOT NULL
+);
+
+SELECT create_hypertable('telemetry', 'time');
+
 CREATE TABLE video_events (
     time TIMESTAMPTZ NOT NULL,
     camera_id TEXT,
@@ -123,6 +132,9 @@ sudo -u postgres psql
 ALTER USER postgres PASSWORD 'yourpassword';
 sudo systemctl restart postgresql
 
+Delete Tables
+===========
+DROP TABLE IF EXISTS telemetry CASCADE;
 
 Creating Indexes
 =============
@@ -182,3 +194,10 @@ mosquitto_sub -t video/events
 RabitMQ
 ==========
 http://localhost:15672/,guest,guest,
+docker exec -it rabbitmq bash
+
+Industrial Bus Publish
+===============
+industrial/modbus/modbus_1
+industrial/opcua/opcua_1
+industrial/goose/goose_1

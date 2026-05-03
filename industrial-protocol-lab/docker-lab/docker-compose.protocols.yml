@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+
+  # -------------------------
+  # Modbus TCP Simulator
+  # -------------------------
+  modbus:
+    build: ./modbus
+    container_name: modbus_sim
+    ports:
+      - "5020:5020"
+
+  # -------------------------
+  # OPC UA Simulator
+  # -------------------------
+  opcua:
+    build: ./opcua
+    container_name: opcua_sim
+    ports:
+      - "4840:4840"
+
+  # -------------------------
+  # MQTT test publisher (optional)
+  # -------------------------
+  mqtt_test:
+    image: eclipse-mosquitto
+    container_name: mqtt_test
+    ports:
+      - "1884:1883"

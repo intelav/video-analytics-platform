@@ -21,10 +21,10 @@ def get_telemetry():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT time, device_id, temperature, cpu_usage, memory_usage
+        SELECT time, device, protocol, metrics
         FROM telemetry
         ORDER BY time DESC
-        LIMIT 50
+        LIMIT 100
     """)
 
     rows = cur.fetchall()
@@ -34,9 +34,8 @@ def get_telemetry():
         {
             "time": str(r[0]),
             "device": r[1],
-            "temperature": r[2],
-            "cpu": r[3],
-            "memory": r[4]
+            "protocol": r[2],
+            "metrics": r[3]
         } for r in rows
     ]
 
