@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package multimodal;
+
+service MultiModalService {
+  rpc ProcessFrame (FrameRequest) returns (Response);
+  rpc ProcessVoice (AudioRequest) returns (Response);
+}
+
+message FrameRequest {
+  bytes image = 1;
+  string prompt = 2;
+}
+
+message AudioRequest {
+  bytes audio = 1;
+}
+
+message Response {
+  string text = 1;
+  bytes audio = 2;
+}

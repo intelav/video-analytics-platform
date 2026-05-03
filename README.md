@@ -9,6 +9,24 @@ psql -h localhost -p 5432 -U postgres -d video_analytics
 docker exec -it timescaledb psql -U postgres -d video_analytics
 
 
+grpc ode creation
+==================
+python -m grpc_tools.protoc -I=proto \
+--python_out=. \
+--grpc_python_out=. \
+proto/multimodal.proto
+
+
+Inference Start
+=============
+hiim:cd /media/avaish/aiwork/video-analytics-platform/services/inference
+python inferyolo.py
+python run_streaming.py
+
+Camera
+==========
+v4l2-ctl --list-devices
+
 Timescale DB
 ==============
 \dx

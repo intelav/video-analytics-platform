@@ -1,0 +1,8 @@
+grpcio
+grpcio-tools
+numpy
+opencv-python
+requests
+faster-whisper
+redis
+tritonclient[grpc]

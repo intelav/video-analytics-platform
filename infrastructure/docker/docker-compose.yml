@@ -9,7 +9,7 @@ services:
     image: timescale/timescaledb:latest-pg14
     container_name: timescaledb
     environment:
-      POSTGRES_PASSWORD: 
+      POSTGRES_PASSWORD: noida1**
       POSTGRES_DB: video_analytics
     ports:
       - "5432:5432"
@@ -29,6 +29,10 @@ services:
       - timescaledb
     environment:
       DB_HOST: timescaledb
+      DB_PORT: 5432
+      DB_NAME: video_analytics
+      DB_USER: postgres
+      DB_PASSWORD: noida1**
     restart: unless-stopped
 
   # -------------------------
@@ -82,7 +86,7 @@ services:
       DB_PORT: 5432
       DB_NAME: video_analytics
       DB_USER: postgres
-      DB_PASSWORD: 
+      DB_PASSWORD: noida1**
       RABBITMQ_HOST: rabbitmq
     restart: unless-stopped
 

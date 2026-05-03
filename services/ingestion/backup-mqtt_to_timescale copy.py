@@ -14,7 +14,7 @@ def connect_db():
                 host="timescaledb",   # 🔥 docker service
                 database="video_analytics",
                 user="postgres",
-                password="noida1**",
+                password="",
                 port=5432
             )
             print("✅ Connected to DB")
