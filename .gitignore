@@ -3,8 +3,9 @@
 # -------------------------
 node_modules/
 frontend/react-dashboard/node_modules/
-frontend/react-dashboard/build/
-
+build/
+dist/
+frontend/react-dashboard/public/
 # -------------------------
 # Python
 # -------------------------
